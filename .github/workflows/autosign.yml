@@ -55,7 +55,12 @@ jobs:
         # 更新 Chrome
         echo "更新 Chrome"
         sudo apt-get install -y google-chrome-stable
-    
+
+        # 根據當下 Chrome 版本自動抓正確的 driver
+        CHROME_VERSION=$(google-chrome --version | grep -oE '[0-9]+')
+        wget -q -O /tmp/chromedriver.zip "https://storage.googleapis.com/chrome-for-testing-public/${CHROME_VERSION}/linux64/chromedriver-linux64.zip"
+        unzip /tmp/chromedriver.zip -d /usr/local/bin/
+
     - name: 安装Python依赖
       run: |
         python -m pip install --upgrade pip
