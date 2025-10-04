@@ -67,18 +67,17 @@ jobs:
           exit 1
         fi
         echo "✅ 配置验证通过 (Environment secrets模式: 98tang-autosign)"
-        
+
+        sudo apt-get update
+        sudo apt-get install -y google-chrome-stable
+
     - name: 显示执行时间
       run: |
         echo "⏰ 当前UTC时间: $(date '+%Y-%m-%d %H:%M:%S')"
         echo "🌏 当前北京时间: $(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S')"
         echo "🚀 开始执行自动签到任务"
 
-    - name: Update Chrome to latest version
-  run: |
-    sudo apt-get update
-    sudo apt-get install -y google-chrome-stable
-        
+       
     - name: 执行自动签到
       env:
         # 必需配置
