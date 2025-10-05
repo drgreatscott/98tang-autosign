@@ -55,6 +55,7 @@ jobs:
         # 更新 Chrome
         echo "更新 Chrome"
         sudo apt-get install -y google-chrome-stable
+        pip install --upgrade selenium webdriver-manager
 
     - name: 安装Python依赖
       run: |
