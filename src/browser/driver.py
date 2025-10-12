@@ -18,6 +18,9 @@ try:
         NoSuchElementException,
         WebDriverException,
     )
+    # 新增导入：用于管理ChromeDriver服务
+    from selenium.webdriver.chrome.service import Service
+    from webdriver_manager.chrome import ChromeDriverManager
 
     # 修复undetected_chromedriver的__del__方法以防止句柄错误
     def safe_del(self):
@@ -46,10 +49,12 @@ except ImportError:
             NoSuchElementException,
             WebDriverException,
         )
+        # 新增导入：用于管理ChromeDriver服务
+        from webdriver_manager.chrome import ChromeDriverManager
 
         UNDETECTED_AVAILABLE = False
     except ImportError:
-        raise ImportError("请安装selenium: pip install selenium")
+        raise ImportError("请安装selenium和webdriver-manager: pip install selenium webdriver-manager")
 
 
 class SafeChrome:
@@ -125,11 +130,9 @@ class BrowserDriverManager:
             if UNDETECTED_AVAILABLE:
                 self.logger.info("使用undetected-chromedriver创建浏览器")
                 options = uc.ChromeOptions()
-            
             else:
                 self.logger.info("使用标准selenium创建浏览器")
                 options = Options() if not UNDETECTED_AVAILABLE else uc.ChromeOptions()
-               
 
             # 基础配置
             if headless:
@@ -215,12 +218,24 @@ class BrowserDriverManager:
             options.add_experimental_option("prefs", prefs)
             self.logger.debug("配置浏览器偏好设置: 弹出窗口允许、中文字体支持")
 
-            # 创建驱动
+            # 创建驱动 - 关键修改点：强制使用webdriver-manager提供的驱动
             self.logger.debug("开始初始化浏览器实例")
+            
+            # 1. 先通过webdriver-manager获取匹配当前Chrome的驱动路径
+            driver_path = ChromeDriverManager().install()
+            self.logger.debug(f"webdriver-manager获取的ChromeDriver路径: {driver_path}")
+
             if UNDETECTED_AVAILABLE:
-                raw_driver = uc.Chrome(options=options)
+                # 2. 强制undetected-chromedriver使用指定的驱动路径
+                # 使用driver_executable_path参数而不是service，确保兼容性
+                raw_driver = uc.Chrome(
+                    options=options,
+                    driver_executable_path=driver_path  # 关键修改：指定驱动路径
+                )
             else:
-                raw_driver = webdriver.Chrome(options=options)
+                # 标准selenium路径
+                service = Service(driver_path)
+                raw_driver = webdriver.Chrome(options=options, service=service)
 
             # 使用安全包装器
             self.driver = SafeChrome(raw_driver)
@@ -318,3 +333,4 @@ class BrowserDriverManager:
             return True
         except Exception:
             return False
+    
