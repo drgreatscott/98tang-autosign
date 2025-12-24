@@ -335,8 +335,9 @@ class SignInManager:
             # 查找并点击登录按钮
             login_selectors = [
                 "//button[@type='submit']//em[contains(text(), '登录')]/..",
-                "//button[contains(text(), '登录')]",
+                "button[contains(text(), '登录')]",
                 "#loginsubmit",
+                "lsSubmit()"
             ]
 
             login_button = self.element_finder.find_clickable_by_selectors(
